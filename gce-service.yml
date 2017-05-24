@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-boot-service
+spec:
+  ports:
+  - port: 80
+    targetPort: springb-port
+    protocol: TCP
+  selector:
+    app:  gce-demo
+  type: LoadBalancer
+
+

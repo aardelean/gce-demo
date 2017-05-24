@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mysql-cms-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-cms
+    spec:
+      containers:
+      - name: mysql-cms
+        image: mysql/mysql-server
+        ports:
+        - name: mysql-port
+          containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_HOST
+          value:  "%"
+        - name:  MYSQL_ROOT_PASSWORD
+          value:  pass123

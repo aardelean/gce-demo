@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cms-backend-service
+spec:
+  ports:
+  - port: 3001
+    targetPort: backend-port
+    protocol: TCP
+  selector:
+    app:  appdirect-cms-backend
+  type: LoadBalancer
+
+

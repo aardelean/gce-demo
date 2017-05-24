@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: appdirect-cms-frontend-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: appdirect-cms-frontend
+    spec:
+      containers:
+      - name: appdirect-cms-frontend
+        image: gcr.io/spring-boot-demo-168110/appdirect-cms-frontend:1.0
+        ports:
+        - name: frontend-port
+          containerPort: 3000
+        env:
+        - name: API_URL
+          value:  tcp://cms-backend-service:3001
+
+

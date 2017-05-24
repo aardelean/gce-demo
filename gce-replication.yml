@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: spring-boot-controller
+spec:
+  replicas: 1
+  selector:
+    app: gce-app
+  template:
+    metadata:
+      labels:
+        app: gce-app
+    spec:
+      containers:
+      - name: spring-boot-demo
+        image: gcr.io/spring-boot-demo-168110:1.0
+        ports:
+        - name: springb-port
+          containerPort: 8080

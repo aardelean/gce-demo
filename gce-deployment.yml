@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: gce-deployment
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: gce-demo
+    spec:
+      containers:
+      - name: gce-demo
+        image: gcr.io/spring-boot-demo-168110:1.0
+        ports:
+        - name: springb-port
+          containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds:  15
+          timeoutSeconds: 30

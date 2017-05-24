@@ -1,0 +1,135 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mysql-cms-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-cms
+    spec:
+      containers:
+      - name: mysql-cms
+        image: mysql/mysql-server
+        ports:
+        - name: mysql-port
+          containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_HOST
+          value:  "%"
+        - name:  MYSQL_ROOT_PASSWORD
+          value:  pass123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  ports:
+  - port: 3306
+    targetPort: mysql-port
+    protocol: TCP
+  selector:
+    app:  mysql-cms
+  type: LoadBalancer
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: appdirect-cms-migration-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: appdirect-cms-migration
+    spec:
+      containers:
+      - name: appdirect-cms-migration
+        image: gcr.io/spring-boot-demo-168110/appdirect-cms-backend:1.0
+        args: ["bundle", "exec", "rake", "db:create", "db:migrate"]
+        ports:
+        - name: migration-port
+          containerPort: 3001
+        env:
+        - name: DATABASE_USER
+          value:  root
+        - name: DATABASE_PASS
+          value:  pass123
+        - name: DATABASE_HOST
+          value:  mysql-service
+        - name: RAILS_ENV
+          value:  production
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: appdirect-cms-backend-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: appdirect-cms-backend
+    spec:
+      containers:
+      - name: appdirect-cms-backend
+        image: gcr.io/spring-boot-demo-168110/appdirect-cms-backend:1.0
+        ports:
+        - name: backend-port
+          containerPort: 3001
+        env:
+        - name: DATABASE_USER
+          value:  root
+        - name: DATABASE_PASS
+          value:  pass123
+        - name: DATABASE_HOST
+          value:  mysql-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cms-backend-service
+spec:
+  ports:
+  - port: 3001
+    targetPort: backend-port
+    protocol: TCP
+  selector:
+    app:  appdirect-cms-backend
+  type: LoadBalancer
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: appdirect-cms-frontend-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: appdirect-cms-frontend
+    spec:
+      containers:
+      - name: appdirect-cms-frontend
+        image: gcr.io/spring-boot-demo-168110/appdirect-cms-frontend:1.0
+        ports:
+        - name: frontend-port
+          containerPort: 3000
+        env:
+        - name: API_URL
+          value:  tcp://cms-backend-service:3001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cms-frontend-service
+spec:
+  ports:
+  - port: 80
+    targetPort: frontend-port
+    protocol: TCP
+  selector:
+    app:  appdirect-cms-frontend
+  type: LoadBalancer
